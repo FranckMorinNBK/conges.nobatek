@@ -2,7 +2,8 @@
 <html lang="fr"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Suivi Congés</title>
+<title>Suivi congés Nobatek</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAFC0lEQVR42t2ba2yTVRjHq+IFQ1BEox8lGo1mM0DUJUZj/DBdjBIxRqZAFAcqCPMSF4k3gohRcJkGdV6GZhmwD+CIxGyKRuYFN6cTMCIwooMVupvruq3r1q7tz57ulO3tutn1Pad73/6TsyzZ8qT/f885z+U8j8OhGcDZwDXAMmAL8A3wN9ADBIAhoB9wAQ3ANuAF4HZgusOOAM4CbgJKJNkwqUGItAtYCJxvB+IXyG/6d9TDKXfGTCsSPxdYDpxAP9oi60lgmlXI3xHZoodIP+ojxyNrKolfDJQBIaYOPmCluHPSTf5WoBnr4LO0XJLSpRVJ92U17BO7Uif56dJHWxm/RWKN2TrIz4pcdt9jDwgRZqkkP1satRNqlUSRkUjuIuBX7Ikd4s4yQ/48GbfbGS+mSl6sUuwPkWjdmYoAS00kMFZDK3DFZMjPkVlYJmFPUtGiTGNryEw8kowA95O56AQu+7+U9giZjY8mEmAxmQ/hFbLHO/umo72wf4CwzzuyhvwJ/y/U04WvsZa+mu30frGV3i/L6d9fzZCrGcLanU9VIgFuVOH2OjetxpmffWb17P7Y8Hf/sQN0vPEEzoduoOXB6xOu1mfvoa+6gnBgUJcAwTG7ANis5JZ5a5WBTE/Vh/IrD+HZXkxLfta4xBMJETjZpEuEsvjtf1SnAO6y15ImPnqdKriFQMtxHQJ4z2SMwLWqylqJBOiv+9pILD+LtrUP4P5kPZ7Kd/FUltD1wUu4CvMS74Tn7tV1HFbEBFijzNHGC7CrNEpgmHh2lPRQu3OcGzTEQGMtrtW5Y0Toq9FSh9kbE2CHLgE63y4c3sqP5jBwaH9SNoSHaH3+vrhdsECHd/BF3xiAv3QJcHrFbdEbf/Bww+SctesEzqXzDbYCzVpitDwhQK8uAcTqrkjNwbi3bjDY8Wwr1iHAOofKtDdeAOfiuQQ9/6Zky9900GDL9VQuhIKqBfjcoTTbiBOgY/0yE2FlCNeauwz2Bo80qhbgTyGAX5cA3eVvmrLnqXzHYE/EE4rRLQQ4rdMNmkGgpWnMpRoeUvomE3SorPePGwqnfg5oLVposDlw4EelW0AIUGxdAYgmVKNtdr23ViX/kNIqkA4BROTYsmgkiRJBVXjQp+oj98RefgatKoBA+ysPG+z2132lSoCjsXD4ZysLIAonhhB7s7L0ZU9MgJetLECwu9NQRHEumUfIq6RyvzEmwHVKKkKaBBDoeH25wbZ3X5UKswtGP4XVW1kAb+1uY5S5ocCsSb+hlwB4zMoChLy9OJeMZIjiSATdHWZM1sbXBS+U72iWFCBqv/hpY6GkusKMuZWJqsNFpioM9XuHy9xy+Y8dVCqA/5/DBvu+hm9TdizAJYkEmKEyN7AwSid6ISrIcPIi6LtqIgHOAeoyWIAtybwSz1VZJ7AQ2pJuo4sERq9moACLJtsB/lMGkS8XAd9ke4WulI0FdofoZp+RasdYnnxXtyvEKM4csw2Tz9iUvDuS8s5XNQNUYkPyOSp7hkV88KmNtv08HV3j0+SUiJXxh+kzn8TQxCaLdpLuTMtUmSygPK6qmKoAokxcaKo7PEUhcoDjU0z+l6meHpsJvC+7r9KJLtndYpn5wZvTNFbTJ7vaLrXqzHCuHLRQPU94KvJjHXC5HWaIY6X2jbIFL1WP0S6TmLvFBIudJ8mvlkPV4q74Tg5d9sn5w4D8/STwAyDaS1eJQEZkpLo/33/keXLDS4AiqwAAAABJRU5ErkJggg==">
 <style>
 :root{
   --bg:#f4f5f7; --panel:#ffffff; --panel-2:#fafbfc; --ink:#1a1d21; --ink-2:#5b636d;
@@ -994,7 +995,6 @@ function renderStoreNote(){
 function renderAll(){
   $("#yLabel").textContent = curYear;
   $("#sub").textContent = "Nobatek · " + curYear;
-  document.title = "Suivi Congés " + curYear;
   renderCards(); renderToolbar(); renderCal(); renderFers(); renderLegend();
 }
 function goYear(y){ curYear = y; renderAll(); window.scrollTo({top:0, behavior:"smooth"}); }
