@@ -1,0 +1,1072 @@
+<!doctype html>
+<html lang="fr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Suivi Congés</title>
+<style>
+:root{
+  --bg:#f4f5f7; --panel:#ffffff; --panel-2:#fafbfc; --ink:#1a1d21; --ink-2:#5b636d;
+  --line:#e2e5ea; --line-2:#cfd4db; --accent:#2b6cb0; --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.10);
+  --we:#e9ebee; --we-ink:#9aa1ab; --work:#ffffff;
+  --cp:#3aa2bd; --rtt:#8064a2; --off:#8fb04f; --cet:#2c5f8a; --mal:#e08a3c;
+  --fer:#ffdada; --fer-ink:#c02626;
+  --radius:10px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171b; --panel:#1c2026; --panel-2:#22262d; --ink:#e8eaed; --ink-2:#9aa3ae;
+    --line:#2c323a; --line-2:#3a424c; --accent:#6aa9e0;
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+    --we:#262b32; --we-ink:#6b737e; --work:#1c2026;
+    --fer:#4a2020; --fer-ink:#ff9b9b;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14171b; --panel:#1c2026; --panel-2:#22262d; --ink:#e8eaed; --ink-2:#9aa3ae;
+  --line:#2c323a; --line-2:#3a424c; --accent:#6aa9e0;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+  --we:#262b32; --we-ink:#6b737e; --work:#1c2026;
+  --fer:#4a2020; --fer-ink:#ff9b9b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink); font:14px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased; padding:0 0 60px;
+}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+input{font:inherit;color:inherit}
+
+/* ---------- Header ---------- */
+header{
+  position:sticky; top:0; z-index:30; background:var(--panel); border-bottom:1px solid var(--line);
+  display:flex; align-items:center; gap:16px; padding:10px 18px; flex-wrap:wrap;
+}
+.brand{font-size:15px;font-weight:650;letter-spacing:-.01em;white-space:nowrap}
+.brand small{display:block;font-weight:400;font-size:11px;color:var(--ink-2);letter-spacing:0}
+.yearnav{display:flex;align-items:center;gap:2px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:2px}
+.yearnav button{width:28px;height:28px;border-radius:6px;color:var(--ink-2);font-size:15px;line-height:1}
+.yearnav button:hover{background:var(--line);color:var(--ink)}
+.yearnav .y{font-size:17px;font-weight:650;padding:0 10px;min-width:64px;text-align:center;font-variant-numeric:tabular-nums}
+.spacer{flex:1}
+.hbtn{border:1px solid var(--line);background:var(--panel-2);border-radius:8px;padding:6px 11px;font-size:13px;color:var(--ink-2);white-space:nowrap}
+.hbtn:hover{background:var(--line);color:var(--ink)}
+.hbtn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.hbtn.primary:hover{filter:brightness(1.08);background:var(--accent);color:#fff}
+.st{font-size:12px;font-weight:600;white-space:nowrap;color:var(--ink-2)}
+.st.warn{color:#d9534f}
+.st.ok{color:var(--ink-2);font-weight:500}
+#toast button{text-decoration:underline;font-weight:600;margin-left:12px;color:inherit}
+
+/* ---------- Layout ---------- */
+.wrap{max-width:1620px;margin:0 auto;padding:16px 18px}
+
+/* ---------- Dashboard ---------- */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:11px 13px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--c,var(--line-2))}
+.card h3{font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.045em;color:var(--ink-2);margin-bottom:6px}
+.card .big{font-size:25px;font-weight:660;line-height:1.05;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.card .big .u{font-size:13px;font-weight:500;color:var(--ink-2);margin-left:2px}
+.card .sub{font-size:12px;color:var(--ink-2);margin-top:5px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.card .sub input{width:52px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:5px;padding:2px 5px;font-size:12px;text-align:right;font-variant-numeric:tabular-nums}
+.card .sub input:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+.bar{height:4px;border-radius:3px;background:var(--line);margin-top:9px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--c,var(--line-2));border-radius:3px;transition:width .2s}
+.card.warn .big{color:#d9534f}
+
+/* ---------- Toolbar ---------- */
+.toolbar{
+  position:sticky; top:53px; z-index:20; background:var(--panel); border:1px solid var(--line);
+  border-radius:var(--radius); padding:9px 11px; margin-bottom:14px; box-shadow:var(--shadow);
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+}
+.tgroup{display:flex;align-items:center;gap:6px}
+.tlabel{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.045em;color:var(--ink-2);margin-right:2px}
+.brush{display:flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:var(--panel-2);border-radius:8px;padding:5px 10px 5px 8px;font-size:13px;transition:.12s}
+.brush .sw{width:13px;height:13px;border-radius:4px;background:var(--c);border:1px solid rgba(0,0,0,.13);flex:none}
+.brush:hover{border-color:var(--line-2)}
+.brush[aria-pressed="true"]{border-color:var(--c,var(--accent));background:color-mix(in srgb,var(--c,var(--accent)) 12%,var(--panel));font-weight:600}
+.brush kbd{font:inherit;font-size:10px;color:var(--ink-2);border:1px solid var(--line-2);border-radius:3px;padding:0 3px;margin-left:1px}
+.seg{display:flex;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:2px;gap:2px}
+.seg button{padding:4px 11px;border-radius:6px;font-size:12.5px;color:var(--ink-2)}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);font-weight:600;box-shadow:var(--shadow)}
+.hint{font-size:12px;color:var(--ink-2)}
+
+/* ---------- Calendar ---------- */
+.cal{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.cal[hidden],.linear[hidden]{display:none}
+@media(max-width:1400px){.cal{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:1050px){.cal{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:680px){.cal{grid-template-columns:1fr}}
+.month{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:10px;box-shadow:var(--shadow)}
+.month h2{font-size:13.5px;font-weight:650;text-align:center;padding-bottom:8px;letter-spacing:-.01em}
+.grid{display:grid;grid-template-columns:26px repeat(7,1fr);gap:2px}
+.dow,.wk{font-size:10.5px;font-weight:600;color:var(--ink-2);text-align:center;padding:3px 0;text-transform:uppercase;letter-spacing:.03em}
+.wk{font-weight:500;font-size:10px;color:var(--we-ink);display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.dow.wknd{color:var(--we-ink)}
+.d{
+  position:relative; aspect-ratio:1/1; min-height:29px; border-radius:5px; overflow:hidden;
+  background:var(--work); border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center;
+  font-size:12.5px; font-variant-numeric:tabular-nums; user-select:none;
+}
+.d.empty{background:transparent;border-color:transparent;pointer-events:none}
+.d.we{background:var(--we);color:var(--we-ink);border-color:transparent}
+.d.fer{background:var(--fer);color:var(--fer-ink);font-weight:650;border-color:transparent}
+.d.pickable{cursor:pointer}
+.d.pickable:hover{outline:2px solid var(--accent);outline-offset:-2px;z-index:2}
+.d .n{position:relative;z-index:2;pointer-events:none;text-shadow:0 0 3px rgba(255,255,255,.35)}
+.d.filled .n{color:#fff;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.28)}
+.d .half{position:absolute;left:0;right:0;z-index:1}
+.d .half.all{top:0;height:100%}
+/* +0.5px de recouvrement : évite le liseré d'arrondi au raccord matin/après-midi */
+.d .half.am{top:0;height:calc(50% + .5px)}
+.d .half.pm{bottom:0;height:50%}
+.d.today{box-shadow:inset 0 0 0 2px var(--accent)}
+.d.today .n{font-weight:700}
+
+/* ---------- Vue compacte (calendrier linéaire) ---------- */
+.linear{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px 16px;box-shadow:var(--shadow);overflow-x:auto}
+.lgrid{display:grid;grid-template-columns:38px repeat(37,minmax(18px,26px)) 46px;gap:2px;justify-content:center;min-width:880px}
+.lgrid .colh{font-size:9.5px;font-weight:600;color:var(--ink-2);text-align:center;padding-bottom:4px;font-variant-numeric:tabular-nums}
+.lgrid .colh.wknd{color:var(--we-ink);font-weight:500}
+.lgrid .corner{border-bottom:1px solid var(--line)}
+.lgrid .mlab{font-size:11px;font-weight:650;color:var(--ink-2);display:flex;align-items:center;justify-content:flex-end;padding-right:7px;text-transform:uppercase;letter-spacing:.03em}
+.lgrid .d{aspect-ratio:auto;min-height:22px;height:22px;font-size:9.5px;border-radius:4px}
+.lgrid .d .n{text-shadow:none;font-weight:500}
+.lgrid .d.we .n{opacity:.55}
+.lgrid .mtot{display:flex;align-items:center;justify-content:flex-end;padding-right:4px;font-size:10.5px;
+  color:var(--ink-2);font-variant-numeric:tabular-nums}
+.lgrid .mtot b{color:var(--ink);font-weight:650}
+.lgrid .sep{height:5px;grid-column:1/-1}
+.lstrip{display:flex;gap:2px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);flex-wrap:wrap;
+  font-size:11.5px;color:var(--ink-2);align-items:center}
+
+/* ---------- Legend / holidays ---------- */
+.foot{display:grid;grid-template-columns:1fr 340px;gap:12px;margin-top:14px}
+@media(max-width:900px){.foot{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;box-shadow:var(--shadow)}
+.panel h3{font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.045em;color:var(--ink-2);margin-bottom:9px}
+.fers{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:2px}
+.fer-row{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:6px;font-size:12.5px}
+.fer-row:hover{background:var(--panel-2)}
+.fer-row .dt{font-variant-numeric:tabular-nums;color:var(--ink-2);width:52px;flex:none}
+.fer-row .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fer-row.off .nm,.fer-row.off .dt{opacity:.4;text-decoration:line-through}
+.fer-row button{font-size:11px;color:var(--ink-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+.fer-row button:hover{background:var(--line);color:var(--ink)}
+.notes{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-2)}
+.notes b{color:var(--ink);font-weight:600}
+.lien{color:var(--accent);text-decoration:underline;font-size:12px;white-space:nowrap}
+.lien:hover{filter:brightness(1.15)}
+.mini{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--ink-2)}
+.mini span{display:flex;align-items:center;gap:6px}
+.mini i{width:12px;height:12px;border-radius:4px;display:inline-block;border:1px solid rgba(0,0,0,.12)}
+.mini i.grad{background:linear-gradient(135deg,var(--work) 0 50%,var(--c) 50% 100%)}
+
+/* ---------- Toast ---------- */
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);
+  padding:9px 16px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:100;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ---------- Print ---------- */
+@media print{
+  body{background:#fff;padding:0}
+  header,.toolbar,#toast,.no-print{display:none!important}
+  .wrap{max-width:none;padding:0}
+  .cal{grid-template-columns:repeat(3,1fr);gap:6px}
+  .card,.month,.panel{box-shadow:none;break-inside:avoid}
+  .d{border-color:#ddd}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Suivi Congés<small id="sub">Nobatek · 2026</small></div>
+  <div class="yearnav">
+    <button id="prevY" title="Année précédente">‹</button>
+    <span class="y" id="yLabel"></span>
+    <button id="nextY" title="Année suivante">›</button>
+  </div>
+  <span id="status" class="st" hidden=""></span>
+  <div class="spacer"></div>
+  <button class="hbtn primary" id="btnResume" hidden="" title="Redonner l'accès à votre fichier — le navigateur demande confirmation">Reprendre mon fichier</button>
+  <button class="hbtn primary" id="btnOpen" hidden="" title="Désigner le fichier .json où sont vos congés">Ouvrir mon fichier</button>
+  <button class="hbtn" id="btnNew" hidden="" title="Créer un nouveau fichier de suivi">Nouveau fichier</button>
+  <button class="hbtn" id="btnToday">Aujourd'hui</button>
+  <button class="hbtn" id="btnCsv">CSV</button>
+  <button class="hbtn" id="btnPrint">Imprimer</button>
+  <button class="hbtn" id="btnTheme" title="Thème clair / sombre">◐</button>
+</header>
+
+<div class="wrap">
+  <section class="cards" id="cards"></section>
+
+  <div class="toolbar">
+    <div class="tgroup" id="brushes"><span class="tlabel">Poser</span></div>
+    <div class="tgroup">
+      <span class="tlabel">Durée</span>
+      <div class="seg" id="slots">
+        <button data-slot="full" aria-pressed="true">Journée</button>
+        <button data-slot="am" aria-pressed="false">Matin</button>
+        <button data-slot="pm" aria-pressed="false">Après-midi</button>
+      </div>
+    </div>
+    <div class="tgroup">
+      <span class="tlabel">Vue</span>
+      <div class="seg" id="views">
+        <button data-view="grid" aria-pressed="true">12 mois</button>
+        <button data-view="compact" aria-pressed="false">Compacte</button>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <span class="hint">Clic pour poser · glisser pour une série · clic droit pour effacer</span>
+  </div>
+
+  <section class="cal" id="cal"></section>
+  <section class="linear" id="lin" hidden=""></section>
+
+  <div class="foot">
+    <div class="panel">
+      <h3>Jours fériés <span id="ferCount" style="font-weight:400;text-transform:none;letter-spacing:0"></span></h3>
+      <div class="fers" id="fers"></div>
+      <div class="notes">Un férié désactivé redevient un jour ouvré (ex. lundi de Pentecôte travaillé au titre de la journée de solidarité).</div>
+    </div>
+    <div class="panel">
+      <h3>Légende</h3>
+      <div class="mini" id="legend"></div>
+      <div class="notes" id="storeNote"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="" style="pointer-events: none;"></div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   Types de jours
+   ============================================================ */
+const TYPES = [
+  { id:"CP",  label:"Congés payés",   short:"CP",      color:"#3aa2bd", key:"1", credit:true  },
+  { id:"RTT", label:"RTT",            short:"RTT",     color:"#8064a2", key:"2", credit:true  },
+  { id:"OFF", label:"Jours OFF",      short:"OFF",     color:"#8fb04f", key:"3", credit:true  },
+  { id:"CET", label:"CET",            short:"CET",     color:"#2c5f8a", key:"4", credit:true  },
+  { id:"MAL", label:"Congés maladie", short:"Maladie", color:"#e08a3c", key:"5", credit:false },
+];
+const TYPE = Object.fromEntries(TYPES.map(t => [t.id, t]));
+const MONTHS = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+const DOW = ["Lu","Ma","Me","Je","Ve","Sa","Di"];
+const DEFAULT_CREDITS = { CP:25, RTT:10, OFF:0, CET:0 };
+
+
+/* ============================================================
+   Fichier de données — un JSON sur l'ordinateur de l'utilisateur
+   ------------------------------------------------------------
+   La page ne contient aucune donnée : elle peut être publiée telle
+   quelle (GitHub Pages, intranet…) et servir à tout le monde. Chacun
+   désigne SON fichier — congés posés, crédits, fériés retirés et
+   préférences (thème, vue, durée, type) — que la page réécrit à
+   chaque modification.
+
+   Le navigateur retient ce fichier d'une visite à l'autre : le droit
+   d'accès (« handle ») est rangé en IndexedDB. Un cookie n'y suffirait
+   pas — il ne garde que du texte, et un chemin en texte ne rouvre
+   aucun fichier. En https, ce stockage fonctionne ; c'est en « file:// »
+   qu'il est refusé, d'où l'intérêt de publier la page.
+
+   Reste la permission d'écriture, que Chrome ou Edge peuvent
+   redemander au retour : un clic, et l'option « Autoriser à chaque
+   visite » (ou l'installation de la page en application) l'éteint
+   définitivement.
+   ============================================================ */
+const SUGGESTED = "suivi-conges.json";
+const HAS_FS = typeof window.showSaveFilePicker === "function"
+            && typeof window.showOpenFilePicker === "function";
+
+const BLANK = () => ({
+  version: 2, updated: null,
+  settings: { theme:null, view:"grid", slot:"full", brush:"CP" },
+  years: {},
+});
+let DB = BLANK();
+let handle = null, connected = false;
+const fileName = () => (handle && handle.name) || SUGGESTED;
+
+/* ------------------------------------------------------------
+   Mémoire du fichier choisi. Seul le droit d'accès y est rangé,
+   aucune donnée de congés.
+   ------------------------------------------------------------ */
+const IDB_NAME = "suivi-conges", IDB_STORE = "handles", IDB_KEY = "fichier";
+function idbOpen(){
+  return new Promise((res, rej) => {
+    let r; try { r = indexedDB.open(IDB_NAME, 1); } catch(e){ return rej(e); }
+    r.onupgradeneeded = () => r.result.createObjectStore(IDB_STORE);
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function idbGet(k){
+  try {
+    const db = await idbOpen();
+    return await new Promise((res, rej) => {
+      const q = db.transaction(IDB_STORE, "readonly").objectStore(IDB_STORE).get(k);
+      q.onsuccess = () => res(q.result || null); q.onerror = () => rej(q.error);
+    });
+  } catch(e){ return null; }
+}
+async function idbSet(k, v){
+  try {
+    const db = await idbOpen();
+    await new Promise((res, rej) => {
+      const t = db.transaction(IDB_STORE, "readwrite");
+      t.objectStore(IDB_STORE).put(v, k);
+      t.oncomplete = res; t.onerror = () => rej(t.error);
+    });
+  } catch(e){}
+}
+async function idbDel(k){
+  try {
+    const db = await idbOpen();
+    await new Promise((res, rej) => {
+      const t = db.transaction(IDB_STORE, "readwrite");
+      t.objectStore(IDB_STORE).delete(k);
+      t.oncomplete = res; t.onerror = () => rej(t.error);
+    });
+  } catch(e){}
+}
+
+async function permission(h, ask){
+  const opt = { mode:"readwrite" };
+  try {
+    let p = await h.queryPermission(opt);
+    if (p !== "granted" && ask) p = await h.requestPermission(opt);
+    return p;
+  } catch(e){ return "denied"; }
+}
+
+/* ------------------------------------------------------------
+   Affichage de l'état : boutons de l'en-tête + pastille
+   ------------------------------------------------------------ */
+function setStatus(cls, text, title){
+  const el = $("#status");
+  el.hidden = !text;
+  el.className = "st" + (cls ? " " + cls : "");
+  el.textContent = text || "";
+  el.title = title || "";
+}
+const hhmm = () => new Date().toLocaleTimeString("fr-FR", { hour:"2-digit", minute:"2-digit" });
+
+/* "choisir" : aucun fichier connu · "reprendre" : fichier connu, autorisation
+   à confirmer · "rien" : tout est en place. */
+function showButtons(etat){
+  $("#btnOpen").hidden   = etat !== "choisir";
+  $("#btnNew").hidden    = etat !== "choisir";
+  $("#btnResume").hidden = etat !== "reprendre";
+  if (etat === "reprendre") $("#btnResume").textContent = "Reprendre " + fileName();
+}
+
+function askChoose(msg){
+  connected = false;
+  showButtons("choisir");
+  setStatus("warn", "● aucun fichier de suivi",
+    "Ouvrez votre fichier de congés, ou créez-le : la page y écrira ensuite chaque modification.");
+  renderAll();
+  if (msg) toast(msg);
+}
+
+function askResume(){
+  connected = false;
+  showButtons("reprendre");
+  setStatus("warn", "● " + fileName() + " à autoriser",
+    "Le navigateur redemande l'accès à ce fichier. Un clic suffit — et l'option « Autoriser à chaque visite » évite qu'il le redemande.");
+  renderAll();
+}
+
+/* ------------------------------------------------------------
+   Ouverture, création, reprise
+   ------------------------------------------------------------ */
+/* Contenu d'un fichier : null s'il est vide, sinon l'objet lu.
+   Lève si le fichier est illisible ou n'est pas un suivi. */
+async function readHandle(h){
+  const txt = (await (await h.getFile()).text()).trim();
+  if (!txt) return null;
+  const d = JSON.parse(txt);
+  if (!d || typeof d !== "object" || (!d.years && !d.settings))
+    throw new Error("ce fichier n'est pas un suivi de congés");
+  return d;
+}
+
+async function openExisting(){
+  let picked;
+  try {
+    [picked] = await window.showOpenFilePicker({
+      id:"suivi-conges", startIn:"documents", multiple:false,
+      types:[{ description:"Suivi congés", accept:{ "application/json":[".json"] } }],
+    });
+  } catch(e){ return; }                        // annulé
+  if (await permission(picked, true) !== "granted"){
+    askChoose("⚠ Sans droit d'écriture, vos saisies ne pourraient pas être enregistrées");
+    return;
+  }
+  let json;
+  try { json = await readHandle(picked); }
+  catch(e){ askChoose("⚠ « " + picked.name + " » illisible : " + e.message); return; }
+  handle = picked;
+  await idbSet(IDB_KEY, handle);
+  start(json);
+}
+
+/* Création. Si l'utilisateur désigne un fichier qui contient déjà un suivi,
+   on l'ouvre au lieu de l'écraser : rien ne se perd par mégarde. */
+async function createNew(){
+  let picked;
+  try {
+    picked = await window.showSaveFilePicker({
+      id:"suivi-conges", startIn:"documents", suggestedName:SUGGESTED,
+      types:[{ description:"Suivi congés", accept:{ "application/json":[".json"] } }],
+    });
+  } catch(e){ return; }                        // annulé
+  if (await permission(picked, true) !== "granted"){
+    askChoose("⚠ Sans droit d'écriture, le fichier ne peut pas être créé");
+    return;
+  }
+  let json = null;
+  try { json = await readHandle(picked); } catch(e){ json = null; }
+  handle = picked;
+  await idbSet(IDB_KEY, handle);
+  if (json) toast("Ce fichier contenait déjà un suivi : il a été repris, pas écrasé");
+  start(json);
+}
+
+async function resume(){
+  if (!handle) return askChoose();
+  if (await permission(handle, true) !== "granted"){ askResume(); return; }
+  let json;
+  try { json = await readHandle(handle); }
+  catch(e){
+    const perdu = e.name === "NotFoundError";
+    handle = null; await idbDel(IDB_KEY);
+    askChoose(perdu ? "⚠ Fichier introuvable — a-t-il été déplacé ?"
+                    : "⚠ Fichier illisible : " + e.message);
+    return;
+  }
+  start(json);
+}
+
+async function changeFile(){
+  handle = null; connected = false;
+  await idbDel(IDB_KEY);
+  DB = BLANK();
+  applySettings();
+  askChoose();
+}
+
+/* ------------------------------------------------------------
+   Données en place
+   ------------------------------------------------------------ */
+function start(json){
+  connected = true;
+  showButtons("rien");
+  if (json) adopt(json);
+  applySettings();
+  renderAll();
+  setStatus("ok", "✓ " + fileName(), "Chaque modification est écrite dans ce fichier");
+  if (!json) flush();                          // fichier neuf ou vide : on l'initialise
+  // Évite que le navigateur oublie le fichier en faisant le ménage dans son stockage.
+  try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch(e){}
+}
+
+function adopt(d){
+  DB = BLANK();
+  if (!d || typeof d !== "object") return;
+  if (d.years && typeof d.years === "object") DB.years = d.years;
+  if (d.settings && typeof d.settings === "object") Object.assign(DB.settings, d.settings);
+  DB.updated = d.updated || null;
+}
+
+function applySettings(){
+  const s = DB.settings;
+  if (s.theme === "dark" || s.theme === "light") document.documentElement.setAttribute("data-theme", s.theme);
+  else document.documentElement.removeAttribute("data-theme");
+  viewMode = s.view === "compact" ? "compact" : "grid";
+  slotMode = ["full","am","pm"].includes(s.slot) ? s.slot : "full";
+  brush = TYPE[s.brush] ? s.brush : "CP";
+}
+
+/* Ce qui part dans le fichier : trié, et sans les années vides que la simple
+   consultation crée en mémoire. */
+function snapshot(){
+  const years = {};
+  for (const y of Object.keys(DB.years).sort()){
+    const yr = DB.years[y] || {}, days = yr.days || {};
+    const vide = !Object.keys(days).length && !(yr.holidaysOff || []).length &&
+      !Object.keys(yr.holidaysAdd || {}).length &&
+      TYPES.filter(t => t.credit).every(t =>
+        Number((yr.credits || {})[t.id] ?? DEFAULT_CREDITS[t.id]) === DEFAULT_CREDITS[t.id]);
+    if (vide) continue;
+    years[y] = {
+      credits: { ...DEFAULT_CREDITS, ...(yr.credits || {}) },
+      days: Object.fromEntries(Object.keys(days).sort().map(k => [k, days[k]])),
+      holidaysOff: [...(yr.holidaysOff || [])].sort(),
+      holidaysAdd: { ...(yr.holidaysAdd || {}) },
+    };
+  }
+  return { version:2, updated:DB.updated, settings:DB.settings, years };
+}
+
+/* Toute modification appelle save() ; l'écriture suit, groupée. */
+let writeTimer = null, writing = false, again = false;
+function save(){
+  DB.updated = new Date().toISOString();
+  if (!connected) return;
+  setStatus("", "Enregistrement…");
+  clearTimeout(writeTimer);
+  writeTimer = setTimeout(flush, 350);
+}
+
+async function flush(){
+  clearTimeout(writeTimer); writeTimer = null;
+  if (!connected || !handle) return;
+  if (writing){ again = true; return; }
+  writing = true;
+  try {
+    const w = await handle.createWritable();
+    await w.write(JSON.stringify(snapshot(), null, 2));
+    await w.close();
+    setStatus("ok", "✓ enregistré " + hhmm(), fileName());
+  } catch(e){
+    writing = false;
+    if (e.name === "NotAllowedError"){ askResume(); return; }
+    if (e.name === "NotFoundError"){
+      handle = null; await idbDel(IDB_KEY);
+      askChoose("⚠ Fichier introuvable — a-t-il été déplacé ?");
+      return;
+    }
+    setStatus("warn", "⚠ écriture impossible", e.message);
+    toast("⚠ Écriture impossible dans « " + fileName() + " »");
+    return;
+  }
+  writing = false;
+  if (again){ again = false; save(); }
+}
+
+/* Démarrage : fichier déjà connu et toujours autorisé ? On charge sans rien
+   demander. Sinon un seul bouton, selon ce qui manque. */
+async function boot(){
+  if (!HAS_FS){
+    showButtons("rien");
+    setStatus("warn", "⚠ navigateur non compatible",
+      "Chrome ou Edge sont nécessaires pour écrire un fichier local. Firefox et Safari ne le permettent pas.");
+    renderAll();
+    return;
+  }
+  handle = await idbGet(IDB_KEY);
+  if (!handle) return askChoose();
+  if (await permission(handle, false) === "granted") return resume();
+  askResume();
+}
+
+function year(y){
+  const k = String(y);
+  if (!DB.years[k]) DB.years[k] = { credits:{...DEFAULT_CREDITS}, days:{}, holidaysOff:[], holidaysAdd:{} };
+  const yr = DB.years[k];
+  yr.credits = {...DEFAULT_CREDITS, ...yr.credits};
+  yr.days = yr.days || {};
+  yr.holidaysOff = yr.holidaysOff || []; yr.holidaysAdd = yr.holidaysAdd || {};
+  return yr;
+}
+
+/* ============================================================
+   Jours fériés français (métropole)
+   ============================================================ */
+function easter(y){                                   // algorithme de Butcher
+  const a=y%19, b=Math.floor(y/100), c=y%100, d=Math.floor(b/4), e=b%4,
+        f=Math.floor((b+8)/25), g=Math.floor((b-f+1)/3), h=(19*a+b-d-g+15)%30,
+        i=Math.floor(c/4), k=c%4, l=(32+2*e+2*i-h-k)%7, m=Math.floor((a+11*h+22*l)/451),
+        mo=Math.floor((h+l-7*m+114)/31), da=((h+l-7*m+114)%31)+1;
+  return new Date(y, mo-1, da);
+}
+const addDays = (d,n) => new Date(d.getFullYear(), d.getMonth(), d.getDate()+n);
+const iso = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+
+function holidaysFor(y){
+  const p = easter(y), h = {};
+  h[y+"-01-01"]="Jour de l'an";
+  h[iso(addDays(p,1))]="Lundi de Pâques";
+  h[y+"-05-01"]="Fête du Travail";
+  h[y+"-05-08"]="Fête de la Victoire";
+  h[iso(addDays(p,39))]="Ascension";
+  h[iso(addDays(p,50))]="Lundi de Pentecôte";
+  h[y+"-07-14"]="Fête nationale";
+  h[y+"-08-15"]="Assomption";
+  h[y+"-11-01"]="Toussaint";
+  h[y+"-11-11"]="Armistice";
+  h[y+"-12-25"]="Noël";
+  Object.assign(h, year(y).holidaysAdd);
+  return h;
+}
+
+/* ============================================================
+   État de l'interface
+   ============================================================ */
+let curYear = new Date().getFullYear();
+let brush = "CP", slotMode = "full", viewMode = "grid", dragging = false, dragErase = false;
+
+const $  = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const fmt = n => (Math.round(n*2)/2).toLocaleString("fr-FR");
+
+let toastTimer;
+function toast(msg, action){
+  const t = $("#toast");
+  t.textContent = msg;                       // remet aussi à zéro un bouton précédent
+  if (action){
+    const b = document.createElement("button");
+    b.textContent = action.label;
+    b.onclick = () => { t.classList.remove("on"); clearTimeout(toastTimer); action.run(); };
+    t.appendChild(b);
+  }
+  t.style.pointerEvents = action ? "auto" : "none";
+  t.classList.add("on");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("on"), action ? 12000 : 2200);
+}
+
+/* ============================================================
+   Calculs
+   ============================================================ */
+function tally(y){
+  const yr = year(y), hol = holidaysFor(y), off = new Set(yr.holidaysOff);
+  const posed = Object.fromEntries(TYPES.map(t=>[t.id,0]));
+  for (const [date, slots] of Object.entries(yr.days)){
+    if (!date.startsWith(y+"-")) continue;
+    for (const s of ["am","pm"]) if (slots[s] && posed[slots[s]] !== undefined) posed[slots[s]] += 0.5;
+  }
+  // jours ouvrés (lun-ven) hors fériés effectifs
+  let weekdays = 0, feries = 0;
+  const d = new Date(y,0,1);
+  while (d.getFullYear() === y){
+    const k = iso(d), dw = d.getDay();
+    if (hol[k] && !off.has(k)) { feries++; if (dw!==0 && dw!==6) weekdays--; }
+    if (dw!==0 && dw!==6) weekdays++;
+    d.setDate(d.getDate()+1);
+  }
+  const totalPosed = TYPES.reduce((a,t)=>a+posed[t.id], 0);
+  return { posed, feries, weekdays, worked: weekdays - totalPosed };
+}
+
+/* ============================================================
+   Rendu — tableau de bord
+   ============================================================ */
+function renderCards(){
+  const t = tally(curYear), yr = year(curYear);
+  const el = $("#cards"); el.innerHTML = "";
+
+  for (const ty of TYPES){
+    const posed = t.posed[ty.id];
+    const c = document.createElement("div");
+    c.className = "card"; c.style.setProperty("--c", ty.color);
+    if (ty.credit){
+      const credit = Number(yr.credits[ty.id]) || 0;
+      const left = credit - posed;
+      if (left < 0) c.classList.add("warn");
+      const pct = credit > 0 ? Math.min(100, posed/credit*100) : 0;
+      c.innerHTML = `
+        <h3>${ty.label}</h3>
+        <div class="big">${fmt(left)}<span class="u">j restants</span></div>
+        <div class="sub">${fmt(posed)} posés sur <input type="number" step="0.5" min="0" data-credit="${ty.id}" value="${credit}"> j</div>
+        <div class="bar"><i style="width:${pct}%"></i></div>`;
+    } else {
+      c.innerHTML = `
+        <h3>${ty.label}</h3>
+        <div class="big">${fmt(posed)}<span class="u">j</span></div>
+        <div class="sub">sans décompte de crédit</div>`;
+    }
+    el.appendChild(c);
+  }
+
+  const extra = document.createElement("div");
+  extra.className = "card"; extra.style.setProperty("--c","var(--line-2)");
+  extra.innerHTML = `
+    <h3>Jours travaillés</h3>
+    <div class="big">${fmt(t.worked)}<span class="u">j</span></div>
+    <div class="sub">${t.weekdays} j ouvrés · ${t.feries} fériés</div>`;
+  el.appendChild(extra);
+
+  $$("[data-credit]").forEach(inp => {
+    inp.addEventListener("change", () => {
+      year(curYear).credits[inp.dataset.credit] = Number(inp.value) || 0;
+      save(); renderCards();
+    });
+  });
+}
+
+/* ============================================================
+   Rendu — barre d'outils
+   ============================================================ */
+function renderToolbar(){
+  const box = $("#brushes");
+  box.querySelectorAll(".brush").forEach(b => b.remove());
+  const items = TYPES.map(t => ({id:t.id, label:t.short, color:t.color, key:t.key}));
+  for (const it of items){
+    const b = document.createElement("button");
+    b.className = "brush"; b.dataset.brush = it.id;
+    b.style.setProperty("--c", it.color);
+    b.setAttribute("aria-pressed", brush === it.id);
+    b.innerHTML = `<span class="sw"></span>${it.label}<kbd>${it.key}</kbd>`;
+    b.addEventListener("click", () => setBrush(it.id));
+    box.appendChild(b);
+  }
+  $$("#slots button").forEach(b => b.setAttribute("aria-pressed", b.dataset.slot === slotMode));
+  $$("#views button").forEach(b => b.setAttribute("aria-pressed", b.dataset.view === viewMode));
+  const hint = $(".toolbar .hint");
+  if (hint) hint.textContent = connected
+    ? "Clic pour poser · glisser pour une série · clic droit pour effacer"
+    : "Ouvrez ou créez votre fichier de suivi pour commencer";
+}
+
+function setView(v){
+  viewMode = v; DB.settings.view = v; save();
+  renderToolbar(); renderCal();
+}
+function setSlot(s){
+  slotMode = s; DB.settings.slot = s; save();
+  renderToolbar();
+}
+function setBrush(b){
+  brush = b; DB.settings.brush = b; save();
+  renderToolbar();
+}
+
+/* ============================================================
+   Rendu — calendrier
+   ============================================================ */
+/* Contexte partagé par les deux vues */
+function calCtx(){
+  const yr = year(curYear), hol = holidaysFor(curYear);
+  return { yr, hol, off:new Set(yr.holidaysOff), today:iso(new Date()) };
+}
+
+/* Calques de couleur d'une journée. Une journée entière d'un seul type donne
+   UN calque pleine hauteur — deux moitiés laisseraient un trait blanc au raccord. */
+function layersFor(slots){
+  if (slots.am && slots.pm && slots.am === slots.pm)
+    return [{ cls:"all", color:TYPE[slots.am].color }];
+  return ["am","pm"].filter(s => slots[s])
+                    .map(s => ({ cls:s, color:TYPE[slots[s]].color }));
+}
+
+/* Fabrique le HTML d'une cellule-jour, commune aux deux vues.
+   `label` = ce qui s'affiche dedans (n° du jour, ou initiale du jour de semaine). */
+function dayCell(ctx, m, day, label){
+  const date = `${curYear}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+  const dw = new Date(curYear, m, day).getDay();
+  const wknd = dw === 0 || dw === 6;
+  const isFer = ctx.hol[date] && !ctx.off.has(date);
+  const slots = ctx.yr.days[date] || {};
+  const cls = ["d"];
+  let layers = "", tip = `${String(day).padStart(2,"0")}/${String(m+1).padStart(2,"0")}/${curYear}`;
+
+  // un férié reste signalé en rouge même s'il tombe un samedi ou un dimanche
+  if (isFer){ cls.push("fer"); tip += " — " + ctx.hol[date]; }
+  else if (wknd) cls.push("we");
+  else {
+    cls.push("pickable");
+    layers = layersFor(slots).map(l =>
+      `<span class="half ${l.cls}" style="background:${l.color}"></span>`).join("");
+    const names = [];
+    for (const s of ["am","pm"])
+      if (slots[s]) names.push((s === "am" ? "Matin" : "A-m") + " : " + TYPE[slots[s]].label);
+    if (slots.am && slots.pm) cls.push("filled");
+    if (names.length) tip += " — " + (slots.am && slots.pm && slots.am === slots.pm
+      ? TYPE[slots.am].label + " (journée)" : names.join(" · "));
+  }
+  if (date === ctx.today) cls.push("today");
+  return `<div class="${cls.join(" ")}" data-date="${date}" title="${tip}">${layers}<span class="n">${label}</span></div>`;
+}
+
+function renderCal(){
+  $("#cal").hidden = viewMode !== "grid";
+  $("#lin").hidden = viewMode !== "compact";
+  if (viewMode === "compact") renderLinear(); else renderGrid();
+  bindDays();
+}
+
+/* --- Vue « 12 mois » : une carte par mois --- */
+function renderGrid(){
+  const ctx = calCtx();
+  const cal = $("#cal"); cal.innerHTML = "";
+
+  for (let m = 0; m < 12; m++){
+    const box = document.createElement("div");
+    box.className = "month";
+    let html = `<h2>${MONTHS[m]}</h2><div class="grid"><div class="dow">Sem.</div>` +
+               DOW.map((d,i) => `<div class="dow${i>4?" wknd":""}">${d}</div>`).join("");
+
+    const first = new Date(curYear, m, 1);
+    const lead = (first.getDay() + 6) % 7;                 // lundi = 0
+    const nDays = new Date(curYear, m+1, 0).getDate();
+    const cells = lead + nDays, weeks = Math.ceil(cells/7);
+
+    for (let w = 0; w < weeks; w++){
+      const monday = new Date(curYear, m, 1 - lead + w*7);
+      html += `<div class="wk">${isoWeek(monday)}</div>`;
+      for (let i = 0; i < 7; i++){
+        const idx = w*7 + i, day = idx - lead + 1;
+        if (day < 1 || day > nDays){ html += `<div class="d empty"></div>`; continue; }
+        html += dayCell(ctx, m, day, day);
+      }
+    }
+    box.innerHTML = html + "</div>";
+    cal.appendChild(box);
+  }
+}
+
+/* --- Vue compacte : calendrier linéaire, 12 lignes × 37 colonnes ---
+   Chaque mois est décalé du jour de semaine de son 1er, si bien qu'une colonne
+   correspond toujours au même jour de la semaine. 31 jours + 6 de décalage = 37. */
+const MONTHS_SHORT = ["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
+const LCOLS = 37;
+
+function renderLinear(){
+  const ctx = calCtx();
+  let html = `<div class="lgrid"><div class="colh corner"></div>`;
+  for (let c = 0; c < LCOLS; c++)
+    html += `<div class="colh${c % 7 > 4 ? " wknd" : ""}">${DOW[c % 7][0]}</div>`;
+  html += `<div class="colh">Posés</div>`;
+
+  for (let m = 0; m < 12; m++){
+    const nDays = new Date(curYear, m+1, 0).getDate();
+    const lead = (new Date(curYear, m, 1).getDay() + 6) % 7;   // lundi = 0
+    html += `<div class="mlab">${MONTHS_SHORT[m]}</div>`;
+    let posed = 0;
+    for (let c = 0; c < LCOLS; c++){
+      const d = c - lead + 1;
+      if (d < 1 || d > nDays){ html += `<div class="d empty"></div>`; continue; }
+      const date = `${curYear}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+      const slots = ctx.yr.days[date] || {};
+      if (slots.am) posed += 0.5;
+      if (slots.pm) posed += 0.5;
+      html += dayCell(ctx, m, d, d);
+    }
+    html += `<div class="mtot">${posed ? `<b>${fmt(posed)}</b>&nbsp;j` : "—"}</div>`;
+  }
+  html += `</div>`;
+
+  const t = tally(curYear);
+  const totals = TYPES.filter(ty => t.posed[ty.id] > 0);
+  if (totals.length)
+    html += `<div class="lstrip">` + totals.map(ty =>
+      `<span style="display:flex;align-items:center;gap:5px;margin-right:14px">
+         <i style="width:11px;height:11px;border-radius:3px;background:${ty.color};display:inline-block"></i>
+         ${ty.label} <b style="color:var(--ink)">${fmt(t.posed[ty.id])}</b> j</span>`).join("") + `</div>`;
+
+  $("#lin").innerHTML = html;
+}
+
+function isoWeek(d){
+  const t = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  t.setDate(t.getDate() + 3 - ((t.getDay() + 6) % 7));
+  const week1 = new Date(t.getFullYear(), 0, 4);
+  return 1 + Math.round(((t - week1)/86400000 - 3 + ((week1.getDay()+6)%7)) / 7);
+}
+
+/* ============================================================
+   Interactions calendrier
+   ============================================================ */
+function applyTo(date, erase){
+  const yr = year(curYear);
+  const cur = yr.days[date] || { am:null, pm:null };
+  if (erase){
+    if (slotMode === "full") delete yr.days[date];
+    else { cur[slotMode] = null; if (!cur.am && !cur.pm) delete yr.days[date]; else yr.days[date] = cur; }
+  } else {
+    if (slotMode === "full") yr.days[date] = { am:brush, pm:brush };
+    else { cur[slotMode] = brush; yr.days[date] = cur; }
+  }
+}
+
+function bindDays(){
+  if (!connected) return;                    // sans fichier, rien à poser
+  $$(".d.pickable").forEach(el => {
+    el.addEventListener("pointerdown", ev => {
+      ev.preventDefault();
+      // le tactile capture implicitement le pointeur : on le relâche pour suivre le glissé
+      el.releasePointerCapture && el.hasPointerCapture && el.hasPointerCapture(ev.pointerId)
+        && el.releasePointerCapture(ev.pointerId);
+      dragging = true; dragErase = ev.button === 2 || ev.ctrlKey;
+      lastDate = null;
+      paint(el);
+    });
+    el.addEventListener("contextmenu", ev => ev.preventDefault());
+  });
+}
+
+let lastDate = null;
+function paint(el){
+  if (!el || !el.classList.contains("pickable")) return;
+  if (el.dataset.date === lastDate) return;
+  lastDate = el.dataset.date;
+  applyTo(el.dataset.date, dragErase); refreshDay(el);
+}
+
+document.addEventListener("pointermove", ev => {
+  if (!dragging) return;
+  ev.preventDefault();
+  paint(document.elementFromPoint(ev.clientX, ev.clientY)?.closest(".d"));
+}, { passive:false });
+
+function refreshDay(el){
+  const date = el.dataset.date, slots = year(curYear).days[date] || {};
+  el.querySelectorAll(".half").forEach(h => h.remove());
+  el.classList.remove("filled");
+  for (const l of layersFor(slots)){
+    const sp = document.createElement("span");
+    sp.className = "half " + l.cls;
+    sp.style.background = l.color;
+    el.insertBefore(sp, el.firstChild);
+  }
+  if (slots.am && slots.pm) el.classList.add("filled");
+}
+
+document.addEventListener("pointerup", () => {
+  if (!dragging) return;
+  dragging = false; lastDate = null; save(); renderCards();
+  // la vue compacte affiche des totaux mensuels : on les rafraîchit au relâchement
+  if (viewMode === "compact"){ renderLinear(); bindDays(); }
+});
+
+/* ============================================================
+   Rendu — fériés & légende
+   ============================================================ */
+function renderFers(){
+  const yr = year(curYear), hol = holidaysFor(curYear), off = new Set(yr.holidaysOff);
+  const list = Object.entries(hol).sort((a,b) => a[0].localeCompare(b[0]));
+  $("#ferCount").textContent = `— ${list.filter(([d]) => !off.has(d)).length} retenus`;
+  const box = $("#fers"); box.innerHTML = "";
+  for (const [date, name] of list){
+    const d = new Date(date + "T12:00:00");
+    const row = document.createElement("div");
+    row.className = "fer-row" + (off.has(date) ? " off" : "");
+    row.innerHTML = `<span class="dt">${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}</span>
+                     <span class="nm">${name}</span>
+                     <button class="no-print">${off.has(date) ? "Rétablir" : "Retirer"}</button>`;
+    row.querySelector("button").addEventListener("click", () => {
+      const i = yr.holidaysOff.indexOf(date);
+      if (i >= 0) yr.holidaysOff.splice(i,1); else yr.holidaysOff.push(date);
+      save(); renderAll();
+    });
+    box.appendChild(row);
+  }
+}
+
+function renderLegend(){
+  const el = $("#legend");
+  el.innerHTML = TYPES.map(t =>
+      `<span><i style="background:${t.color}"></i>${t.label}</span>`).join("") +
+    `<span><i class="grad" style="--c:${TYPE.CP.color}"></i>Demi-journée</span>` +
+    `<span><i style="background:var(--fer);border-color:var(--fer-ink)"></i>Férié</span>` +
+    `<span><i style="background:var(--we)"></i>Week-end</span>`;
+  renderStoreNote();
+}
+
+function renderStoreNote(){
+  const el = $("#storeNote"); if (!el) return;
+  const changer = ` <button id="btnChange" class="lien no-print">Changer de fichier</button>`;
+  el.innerHTML = !HAS_FS
+    ? `<b>Ce navigateur ne peut pas écrire de fichier local.</b> Chrome ou Edge le permettent ; Firefox et Safari, non.`
+    : connected
+      ? `<b>Vos congés vivent dans « ${fileName()} »</b>, sur votre ordinateur : chaque modification y est écrite aussitôt. Ce fichier n'est jamais envoyé nulle part, et le navigateur s'en souvient d'une visite à l'autre — s'il redemande l'accès, choisissez « Autoriser à chaque visite ».` + changer
+      : handle
+        ? `<b>Votre fichier « ${fileName()} » est connu</b>, mais le navigateur redemande l'autorisation d'y écrire. Un clic sur « Reprendre » suffit ; l'option « Autoriser à chaque visite » évite qu'il le redemande.` + changer
+        : `<b>Aucun fichier de suivi.</b> Ouvrez le vôtre s'il existe déjà, sinon créez-le : vous choisissez où il vit sur votre ordinateur, et la page l'y écrira à chaque modification. Le navigateur le retrouvera aux visites suivantes.`;
+  const b = $("#btnChange");
+  if (b) b.onclick = changeFile;
+}
+
+/* ============================================================
+   Actions
+   ============================================================ */
+function renderAll(){
+  $("#yLabel").textContent = curYear;
+  $("#sub").textContent = "Nobatek · " + curYear;
+  document.title = "Suivi Congés " + curYear;
+  renderCards(); renderToolbar(); renderCal(); renderFers(); renderLegend();
+}
+function goYear(y){ curYear = y; renderAll(); window.scrollTo({top:0, behavior:"smooth"}); }
+
+$("#prevY").onclick = () => goYear(curYear-1);
+$("#nextY").onclick = () => goYear(curYear+1);
+$("#btnToday").onclick = () => goYear(new Date().getFullYear());
+$("#btnPrint").onclick = () => window.print();
+
+/* ------------------------------------------------------------
+   Désigner son fichier : ouvrir celui qui existe, ou en créer un.
+   Une fois fait, le navigateur le retrouve tout seul.
+   ------------------------------------------------------------ */
+$("#btnOpen").onclick   = openExisting;
+$("#btnNew").onclick    = createNew;
+$("#btnResume").onclick = resume;
+
+$("#btnCsv").onclick = () => {
+  const yr = year(curYear);
+  const rows = [["Date","Jour","Type","Durée"]];
+  for (const date of Object.keys(yr.days).filter(d => d.startsWith(curYear+"-")).sort()){
+    const s = yr.days[date], d = new Date(date+"T12:00:00");
+    const jour = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"][d.getDay()];
+    if (s.am && s.pm && s.am === s.pm) rows.push([date, jour, TYPE[s.am].label, "1"]);
+    else {
+      if (s.am) rows.push([date, jour, TYPE[s.am].label, "0,5 (matin)"]);
+      if (s.pm) rows.push([date, jour, TYPE[s.pm].label, "0,5 (après-midi)"]);
+    }
+  }
+  const csv = "﻿" + rows.map(r => r.map(v => `"${v}"`).join(";")).join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv"}));
+  a.download = "conges-" + curYear + ".csv";
+  a.click(); URL.revokeObjectURL(a.href);
+  toast("Export CSV " + curYear);
+};
+$("#btnTheme").onclick = () => {
+  const cur = document.documentElement.getAttribute("data-theme");
+  const next = cur === "dark" ? "light" : cur === "light" ? null : "dark";
+  if (next) document.documentElement.setAttribute("data-theme", next);
+  else document.documentElement.removeAttribute("data-theme");
+  DB.settings.theme = next; save();
+};
+
+document.addEventListener("keydown", ev => {
+  if (ev.target.tagName === "INPUT") return;
+  const t = TYPES.find(t => t.key === ev.key);
+  if (t){ setBrush(t.id); return; }
+  if (ev.key === "c" || ev.key === "C"){ setView(viewMode === "grid" ? "compact" : "grid"); return; }
+  if (ev.key === "j" || ev.key === "J") setSlot("full");
+  if (ev.key === "m" || ev.key === "M") setSlot("am");
+  if (ev.key === "a" || ev.key === "A") setSlot("pm");
+  if (ev.key === "ArrowLeft"  && ev.altKey) goYear(curYear-1);
+  if (ev.key === "ArrowRight" && ev.altKey) goYear(curYear+1);
+});
+
+$$("#slots button").forEach(b => b.addEventListener("click", () => setSlot(b.dataset.slot)));
+$$("#views button").forEach(b => b.addEventListener("click", () => setView(b.dataset.view)));
+
+/* ============================================================
+   Démarrage
+   ============================================================ */
+applySettings();
+renderAll();                 // interface vierge tant que le fichier n'est pas lu
+boot();                      // puis lecture du JSON voisin, si le dossier est autorisé
+
+// Une écriture peut être encore en attente au moment de fermer l'onglet.
+window.addEventListener("beforeunload", ev => {
+  if (!writeTimer && !writing) return;
+  flush(); ev.preventDefault(); ev.returnValue = "";
+});
+</script>
+
+
+</body></html>
