@@ -198,7 +198,6 @@ header{
   <button class="hbtn" id="btnNew" hidden="" title="Créer un nouveau fichier de suivi">Nouveau fichier</button>
   <button class="hbtn" id="btnToday">Aujourd'hui</button>
   <button class="hbtn" id="btnCsv">CSV</button>
-  <button class="hbtn" id="btnPrint">Imprimer</button>
   <button class="hbtn" id="btnTheme" title="Thème clair / sombre">◐</button>
 </header>
 
@@ -1003,7 +1002,6 @@ function goYear(y){ curYear = y; renderAll(); window.scrollTo({top:0, behavior:"
 $("#prevY").onclick = () => goYear(curYear-1);
 $("#nextY").onclick = () => goYear(curYear+1);
 $("#btnToday").onclick = () => goYear(new Date().getFullYear());
-$("#btnPrint").onclick = () => window.print();
 
 /* ------------------------------------------------------------
    Désigner son fichier : ouvrir celui qui existe, ou en créer un.
