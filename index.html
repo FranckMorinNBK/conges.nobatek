@@ -171,15 +171,6 @@ header{
   padding:9px 16px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:100;box-shadow:0 6px 20px rgba(0,0,0,.25)}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* ---------- Print ---------- */
-@media print{
-  body{background:#fff;padding:0}
-  header,.toolbar,#toast,.no-print{display:none!important}
-  .wrap{max-width:none;padding:0}
-  .cal{grid-template-columns:repeat(3,1fr);gap:6px}
-  .card,.month,.panel{box-shadow:none;break-inside:avoid}
-  .d{border-color:#ddd}
-}
 </style>
 </head>
 <body>
@@ -955,7 +946,7 @@ function renderFers(){
     row.className = "fer-row" + (off.has(date) ? " off" : "");
     row.innerHTML = `<span class="dt">${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}</span>
                      <span class="nm">${name}</span>
-                     <button class="no-print">${off.has(date) ? "Rétablir" : "Retirer"}</button>`;
+                     <button>${off.has(date) ? "Rétablir" : "Retirer"}</button>`;
     row.querySelector("button").addEventListener("click", () => {
       const i = yr.holidaysOff.indexOf(date);
       if (i >= 0) yr.holidaysOff.splice(i,1); else yr.holidaysOff.push(date);
@@ -977,7 +968,7 @@ function renderLegend(){
 
 function renderStoreNote(){
   const el = $("#storeNote"); if (!el) return;
-  const changer = ` <button id="btnChange" class="lien no-print">Changer de fichier</button>`;
+  const changer = ` <button id="btnChange" class="lien">Changer de fichier</button>`;
   el.innerHTML = !HAS_FS
     ? `<b>Ce navigateur ne peut pas écrire de fichier local.</b> Chrome ou Edge le permettent ; Firefox et Safari, non.`
     : connected
