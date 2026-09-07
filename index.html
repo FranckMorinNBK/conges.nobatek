@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr"><head>
+<html lang="fr" data-theme="light"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Suivi congés Nobatek</title>
@@ -290,7 +290,7 @@ const HAS_FS = typeof window.showSaveFilePicker === "function"
 
 const BLANK = () => ({
   version: 2, updated: null,
-  settings: { theme:null, view:"grid", slot:"full", brush:"CP" },
+  settings: { theme:"light", view:"grid", slot:"full", brush:"CP" },
   years: {},
 });
 let DB = BLANK();
@@ -491,8 +491,9 @@ function adopt(d){
 
 function applySettings(){
   const s = DB.settings;
-  if (s.theme === "dark" || s.theme === "light") document.documentElement.setAttribute("data-theme", s.theme);
-  else document.documentElement.removeAttribute("data-theme");
+  // Clair par défaut : pas de fichier chargé, ou fichier sans préférence.
+  DB.settings.theme = s.theme === "dark" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", DB.settings.theme);
   viewMode = s.view === "compact" ? "compact" : "grid";
   slotMode = ["full","am","pm"].includes(s.slot) ? s.slot : "full";
   brush = TYPE[s.brush] ? s.brush : "CP";
@@ -1041,11 +1042,9 @@ $("#btnCsv").onclick = () => {
   toast("Export CSV");
 };
 $("#btnTheme").onclick = () => {
-  const cur = document.documentElement.getAttribute("data-theme");
-  const next = cur === "dark" ? "light" : cur === "light" ? null : "dark";
-  if (next) document.documentElement.setAttribute("data-theme", next);
-  else document.documentElement.removeAttribute("data-theme");
-  DB.settings.theme = next; save();
+  DB.settings.theme = DB.settings.theme === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", DB.settings.theme);
+  save();
 };
 
 document.addEventListener("keydown", ev => {
